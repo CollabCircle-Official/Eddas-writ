@@ -1,0 +1,2 @@
+# Core game and research harness use only the Python standard library.
+# Optional local NPC dialogue/action proposals require Ollama installed separately.

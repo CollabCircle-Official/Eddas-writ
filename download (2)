@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.sqlite
+*.db
+saves/
+runs/
+adventure_saves/
+.venv/
+venv/
+.env
+*.log

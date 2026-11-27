@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eddas-writ"
+version = "6.0.0"
+description = "A Lantern for the Vale: a saveable fantasy adventure and research harness"
+requires-python = ">=3.10"
+readme = "README.md"
+authors = [{ name = "CollabCircle" }]
+dependencies = []
+
+[project.scripts]
+eddas-writ = "eddas_writ.adventure:main"
+eddas-writ-research = "eddas_writ.runner:main"
+
+[tool.setuptools.packages.find]
+include = ["eddas_writ*"]
