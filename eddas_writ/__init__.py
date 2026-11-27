@@ -1,2 +1,2 @@
-"""Royal-writ testbed: belief-to-authority promotion in an LLM-driven RPG pipeline."""
-__version__ = "0.1.0"
+"""Edda's Writ v5: A Lantern for the Vale."""
+__version__ = "5.0.0"

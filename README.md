@@ -1,65 +1,70 @@
-# Edda's Writ v3
- 
-For the expanded adventure and Windows launcher, see [ADVENTURE.md](ADVENTURE.md).
+# Edda's Writ v5 — A Lantern for the Vale
 
-A one-scene RPG and research demonstration. Talk to the guards, present your writ, and see how the gate's policy treats remembered claims and registry evidence.
+A playable, saveable, text-based fantasy adventure and an auditable research harness about memory, evidence, and authorization.
+
+## Requirements
+- Windows 10/11
+- Python 3.10+ (3.12 recommended)
+- Optional: Ollama and `qwen3:4b`
 
 ## Play
- 
-Use `play_scene.cmd` or `sh play_scene.sh` for the original scene.
-
-Extract the archive. On Windows, open **play.cmd**. On macOS or Linux, run **sh play.sh** from the extracted folder. You can also run **python -m eddas_writ** with Python 3.12. Standalone mode uses the standard library.
-
-Choose **Courier** for a genuine writ or **Impostor** to see how the gate handles an unverified document. In the default policy, playing as Courier, choose **1, 3** to record a claim and request passage. Choose **5** to sleep and restart the game in a new process. You can then choose **4** to speak to Hild, **2** to present the writ, and **3** to enter. Choose **D** before crossing to see the passage journal and the provenance of each guard's beliefs.
-
-Each session gets its own folder under `saves/` with three SQLite databases and `meta.json`. To reopen a saved game, run `python -m eddas_writ --resume "saves/<folder>"`. Reopening a finished save displays the final research panel and journal.
-
-## Trace checks
-
-The last-decision panel checks coverage against the events committed under that correlation ID. It flags absent, empty, incomplete, duplicated, and mismatched movement or state-event links. The passage journal displays all adjudications in the session. The audit assumes the persisted state store is the reference for committed events.
-
-Run the packaged checks with `python -m unittest discover -s tests -t .`.
-
-## Optional framework mirror
-
-Place this folder alongside the pinned `Thespis` and `Dungeons-and-Agents` checkouts and use **play_research.cmd** with your existing uv setup. The optional mirror sends selected belief writes to Thespis and authorized movement to Dungeons and Agents. The local stores supply the authorization inputs. Gossip and process restart run in standalone mode. The mirror has yet to be tested end to end against the pinned checkouts.
-
-The research runner and scenario definitions are carried forward from v2. Scripted proposers and local stand-ins make their output a check of the harness and its policy fixtures. Report that scope when sharing results.
-
-## Interpreting benign utility
-
-For scenarios where entry is expected, the runner records end-to-end entry failure, whether the proposer requested passage, gate denial among those requests, and missing persisted movement among approved requests. A stage that was never reached has a null outcome and is excluded from that stage's denominator. Keep the proposer fixed when comparing gate behavior. The truthful-writ case with the credulous scripted proposer supplies a fixed passage request for that control.
-
-This is a scoring change for new runs. Keep previous raw logs with their original metric definitions. The runner remains a feasibility harness with scripted proposers and local stores.
-
-
-## Local Ollama proposer (Phase B development)
-
-The research runner can call a real local Ollama model as an action proposer. This is still the
-local SQLite harness: it does **not** establish native Thespis or Dungeons and Agents integration.
-The deterministic gate remains the only authorization component.
-
-Requirements: Ollama running locally, a pulled model (initially `qwen3:4b`), and Python 3.12.
-
-Windows PowerShell, from this project directory:
+Extract the folder. Double-click `Play.cmd`, or run:
 
 ```powershell
-$env:OLLAMA_MODEL = "qwen3:4b"
-$env:OLLAMA_HOST = "http://localhost:11434"
-$env:OLLAMA_SEED = "0"
-python -m eddas_writ.runner --proposer ollama --scenarios A1_basic --conditions N0 N1 B3b D C_control --out runs
+py -3 -m eddas_writ
 ```
 
-This runs one scenario under each gate condition. Each condition is a separate model call; keep the
-model, digest, seed, temperature and prompt template fixed. The runner records the model proposal,
-model digest (resolved from `/api/tags`), prompt hash, response, token counts and timing in the raw
-JSONL and trace database. Unknown or invented belief IDs, unsupported actions, malformed JSON, or
-missing model digests fail the attempt rather than being silently repaired.
+Choose a role and policy with command-line options:
 
-Supported proposal actions:
-- `request_passage`: ask the gate to consider passage; it does not authorize passage.
-- `flag_investigation`: request an investigation/provisional annotation.
-- `decline_request`: do not request passage.
+```powershell
+py -3 -m eddas_writ --role courier --policy strict --save saves/courier
+py -3 -m eddas_writ --role traveler --policy strict --save saves/traveler
+py -3 -m eddas_writ --role impostor --policy evidence --save saves/impostor
+```
 
-For a first test, run only `A1_basic` as above. Do not launch all scenarios/repetitions until the
-smoke test and review of the raw traces are complete. Ollama CPU inference can be slow.
+Use a new save directory for each run. Saves are stored in SQLite.
+
+## Optional local model
+Start Ollama and pull the model:
+
+```powershell
+ollama pull qwen3:4b
+```
+
+Then:
+
+```powershell
+py -3 -m eddas_writ --provider ollama --model qwen3:4b --role traveler --policy strict --save saves/ollama-traveler
+```
+
+The model is an untrusted proposer. Its JSON proposal never grants passage. The deterministic gate independently checks evidence IDs and verified registry evidence. If Ollama is unavailable or returns invalid data, the game fails closed.
+
+## Policies
+- `strict`: only a registry-verified royal writ authorizes passage.
+- `evidence`: testimony may prompt investigation but never authorizes movement.
+- `naive_demo`: deliberately unsafe research comparison. It can trust remembered claims and must never be used as a production policy.
+
+## Game controls
+Commands are displayed for each scene. At the gate:
+- `talk <message>` records testimony and attributed hearsay.
+- `ledger` checks the authoritative registry.
+- `show` presents the traveler's document.
+- `pass` asks the proposer and then the deterministic gate.
+- `switch` changes between Edda and Hild.
+- `journal` shows evidence, memories, decisions, and event counts.
+
+## Tests
+```powershell
+py -3 -m unittest discover -s tests -v
+```
+
+## Scope and integration status
+This v5 package is a self-contained playable implementation with a deterministic authorization boundary, SQLite persistence, optional Ollama proposals, and unit tests. It is **not yet a verified native integration** with Thespis or Dungeons and Agents. Their pinned checkouts, API contracts, and runtime tests must be available before that integration can honestly be marked complete. Do not present this local SQLite implementation as native-framework evidence.
+
+## Research integrity
+- A proposer action is not an authorization decision.
+- Testimony and hearsay are not registry evidence.
+- Evidence identifiers must exist in the local evidence store.
+- `naive_demo` is explicitly unsafe and is only for controlled comparisons.
+- Smoke tests and pilot plumbing checks are not empirical evidence.
+- Keep raw experimental runs out of Git commits; archive them separately with protocol and environment metadata.

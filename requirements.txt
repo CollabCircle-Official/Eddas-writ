@@ -1,0 +1,2 @@
+# Core game uses only the Python standard library.
+# Ollama must be installed separately: https://ollama.com/
