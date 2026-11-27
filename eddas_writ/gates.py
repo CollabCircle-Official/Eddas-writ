@@ -64,6 +64,13 @@ def decide(cond, action, beliefs, state, player, roles, chain_id, decision_id):
             d.allowed, d.provisional, d.reason = True, True, "discretionary_provisional_ok"
         return d
 
+    if action.kind == "decline_request":
+        d.reason = "proposer_declined_to_request_passage"
+        return d
+
+    if action.kind != "request_passage":
+        raise ValueError(f"unsupported action kind: {action.kind}")
+
     d.protected = True
     if state.has_entitlement(player):
         d.allowed, d.satisfied_by, d.reason = True, "state_entitlement", "authoritative_entitlement_present"

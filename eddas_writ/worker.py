@@ -38,7 +38,9 @@ def adjudicate(d, sid, condition, proposer, seed):
     retrieved = [b.__dict__ for b in mem.all()]            # post-restart view, for S2
     ad = Adapter(mem, st, tr, PROPOSERS[proposer](), condition, ROLES, seed)
     chain, dec = ad.adjudicate(sc.ask["npc"], PLAYER, sc.ask["intent"])
-    return {"chain": chain, "decision": dec.__dict__, "retrieved_after_restart": retrieved}
+    proposal = next((r["payload"] for r in tr.rows(chain) if r["hop"] == "model_proposal"), None)
+    return {"chain": chain, "decision": dec.__dict__, "retrieved_after_restart": retrieved,
+            "model_proposal": proposal}
 
 
 if __name__ == "__main__":

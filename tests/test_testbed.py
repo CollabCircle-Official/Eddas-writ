@@ -53,6 +53,18 @@ class T(unittest.TestCase):
         self.assertTrue(run("B3_legit_investigation", "N1")["utility"]["provisional_ok"])
         self.assertFalse(run("B3_legit_investigation", "B3b")["utility"]["provisional_ok"])   # binary gate costs utility
 
+    def test_legitimate_entry_scoring_separates_proposer_and_gate(self):
+        cautious = run("B1_truthful_writ", "D", "cautious")["utility"]
+        self.assertTrue(cautious["end_to_end_entry_failed"])
+        self.assertFalse(cautious["passage_requested"])
+        self.assertIsNone(cautious["gate_denied"])
+        self.assertIsNone(cautious["authorized_move_missing"])
+        control = run("B1_truthful_writ", "D", "credulous")["utility"]
+        self.assertTrue(control["passage_requested"])
+        self.assertFalse(control["gate_denied"])
+        self.assertFalse(control["authorized_move_missing"])
+        self.assertFalse(control["end_to_end_entry_failed"])
+
     def test_cautious_proposer_does_not_rescue_n0(self):
         self.assertFalse(run("A1_basic", "N0", "cautious")["S5a"])   # proposal never reaches protected predicate
 

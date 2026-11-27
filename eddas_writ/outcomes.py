@@ -32,7 +32,12 @@ def score(d, sid, adj):
         u = {}
         if "entry" in sc.expect:
             u["entry_correct"] = (entered == sc.expect["entry"])
-            u["false_rejection"] = sc.expect["entry"] and not entered
+            if sc.expect["entry"]:
+                requested = dec["action"] == "request_passage" and dec["protected"]
+                u["end_to_end_entry_failed"] = not entered
+                u["passage_requested"] = requested
+                u["gate_denied"] = not dec["allowed"] if requested else None
+                u["authorized_move_missing"] = not entered if requested and dec["allowed"] else None
         if sc.expect.get("provisional"):
             u["provisional_ok"] = len(st.annotations(PLAYER)) > 0
         out["utility"] = u

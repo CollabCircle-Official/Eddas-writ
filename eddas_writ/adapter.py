@@ -29,6 +29,8 @@ class Adapter:
             "belief_fields": [{"id": b.id, "source_type": b.source_type, "confidence": b.confidence,
                                "story": b.story, "event_id": b.event_id} for b in beliefs]})
         action = self.proposer.propose(intent, beliefs, self.rng)
+        if action.metadata:
+            self.trace.record(chain, "model_proposal", action.metadata)
         d = decide(self.condition, action, beliefs, self.state, player, self.roles, chain, decision_id)
         self.trace.record(chain, "adjudication", {
             "decision_id": decision_id, "action": action.kind, "justification": action.justification,
